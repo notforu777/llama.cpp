@@ -22,6 +22,11 @@ void llama_model_kolibri1::load_arch_hparams(llama_model_loader & ml) {
     if (hparams.n_expert_shared != 1) {
         throw std::runtime_error(format("kolibri1: expected exactly 1 shared expert, got %u", hparams.n_expert_shared));
     }
+    // other community conversions write SIGMOID (2) and route in their graph the same way; there is only one
+    // Kolibri router, so read both as sigmoid_logit_add
+    if (hparams.expert_gating_func == LLAMA_EXPERT_GATING_FUNC_TYPE_SIGMOID) {
+        hparams.expert_gating_func = LLAMA_EXPERT_GATING_FUNC_TYPE_SIGMOID_LOGIT_ADD;
+    }
     if (hparams.expert_gating_func != LLAMA_EXPERT_GATING_FUNC_TYPE_SIGMOID_LOGIT_ADD) {
         throw std::runtime_error(format("kolibri1: expected expert_gating_func %d (sigmoid_logit_add), got %u",
                     (int) LLAMA_EXPERT_GATING_FUNC_TYPE_SIGMOID_LOGIT_ADD, hparams.expert_gating_func));
